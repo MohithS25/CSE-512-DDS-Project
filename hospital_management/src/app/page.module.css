@@ -1,0 +1,13 @@
+/* Scoped styles for the page */
+.title {
+  color: #333;
+}
+
+.text {
+  color: #666;
+}
+
+.page {
+  text-align: center;
+  margin-top: 50px;
+}
