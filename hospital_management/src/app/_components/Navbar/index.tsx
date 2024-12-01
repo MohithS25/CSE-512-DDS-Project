@@ -80,7 +80,7 @@ const Navbar: React.FC = () => {
               }}
             >
               <Link
-                href="/loginPage"
+                href="/signup"
                 style={{
                   display: "block",
                   padding: "10px 20px",
@@ -99,7 +99,7 @@ const Navbar: React.FC = () => {
                 Login
               </Link>
               <Link
-                href="/signup"
+                href="/loginPage"
                 style={{
                   display: "block",
                   padding: "10px 20px",
@@ -123,7 +123,7 @@ const Navbar: React.FC = () => {
 
         {/* Direct Links */}
         <Link
-          href="/loginPage"
+          href="/signup"
           style={{
             color: "white",
             textDecoration: "none",
@@ -146,7 +146,7 @@ const Navbar: React.FC = () => {
         </Link>
 
         <Link
-          href="/signup"
+          href="/loginPage"
           style={{
             color: "white",
             textDecoration: "none",
