@@ -1,124 +1,133 @@
-'use client';
-import React from 'react';
-import { Grid, Box, Typography, FormLabel, OutlinedInput, Button } from '@mui/material';
-import { useRouter } from 'next/navigation';
+"use client";
+import React, { useState } from "react";
+import { Grid, FormLabel, OutlinedInput, Button, Typography } from "@mui/material";
+import { useRouter } from "next/navigation";
+
+// Define types for form fields and errors
+type FormFields = {
+  email: string;
+  password: string;
+};
+
+type Errors = Partial<FormFields>;
 
 export default function LoginPage() {
   const router = useRouter();
 
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [errors, setErrors] = React.useState({
-    email: '',
-    password: '',
+  const [formData, setFormData] = useState<FormFields>({
+    email: "",
+    password: "",
   });
 
-  const validateForm = () => {
-    const newErrors = {
-      email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
-        ? ''
-        : 'Please enter a valid email address.',
-      password: password.trim().length >= 6
-        ? ''
-        : 'Password must be at least 6 characters.',
-    };
-    setErrors(newErrors);
+  const [errors, setErrors] = useState<Errors>({});
+  const [apiError, setApiError] = useState("");
 
-    // Return true if no errors exist
-    return Object.values(newErrors).every((error) => error === '');
+  const validateForm = () => {
+    const newErrors: Errors = {
+      email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
+        ? ""
+        : "Please enter a valid email address.",
+      password: formData.password.trim().length >= 6
+        ? ""
+        : "Password must be at least 6 characters.",
+    };
+
+    setErrors(newErrors);
+    return Object.values(newErrors).every((error) => error === "");
+  };
+
+  const handleInputChange = (field: keyof FormFields, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: "" })); // Clear specific error
+    setApiError(""); // Clear API error if any
   };
 
   const handleLogin = async () => {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch('https://your-backend-url.com/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const response = await fetch("http://localhost:8000/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        console.log('Login successful!');
-        router.push('/homePage');
+        console.log("Login successful!");
+        alert("Login successful! Redirecting to homepage...");
+        router.push("/homePage"); // Redirect to the homepage
       } else {
         const data = await response.json();
-        setErrors((prev) => ({
-          ...prev,
-          password: data.message || 'Invalid login credentials.',
-        }));
+        setApiError(data.message || "Invalid login credentials.");
       }
     } catch (error) {
-      console.error('Network error:', error);
-      setErrors((prev) => ({
-        ...prev,
-        password: 'An error occurred. Please try again.',
-      }));
+      console.error("Network error:", error);
+      setApiError("An error occurred. Please try again later.");
     }
   };
 
   return (
-    <Grid container justifyContent="center" alignItems="center" sx={{ minHeight: '100vh' }}>
-      <Box
-        sx={{
-          width: '100%',
-          maxWidth: 400,
-          p: 3,
-          backgroundColor: 'white',
-          borderRadius: 2,
-          boxShadow: 3,
-        }}
-      >
-        <Typography variant="h5" align="center" gutterBottom>
-          Login
-        </Typography>
-        {/* Email Field */}
+    <Grid container spacing={2} sx={{ padding: "20px" }}>
+      {/* Email */}
+      <Grid item xs={12}>
         <FormLabel htmlFor="email" required>
           Email
         </FormLabel>
         <OutlinedInput
           id="email"
-          name="email"
-          type="email"
-          placeholder="Enter your email"
+          placeholder="Email"
           size="small"
           fullWidth
-          sx={{ mb: 2 }}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={formData.email}
+          onChange={(e) => handleInputChange("email", e.target.value)}
           error={!!errors.email}
         />
         {errors.email && (
-          <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+          <Typography color="error" variant="body2">
             {errors.email}
           </Typography>
         )}
-        {/* Password Field */}
+      </Grid>
+
+      {/* Password */}
+      <Grid item xs={12}>
         <FormLabel htmlFor="password" required>
           Password
         </FormLabel>
         <OutlinedInput
           id="password"
-          name="password"
           type="password"
-          placeholder="Enter your password"
+          placeholder="Password"
           size="small"
           fullWidth
-          sx={{ mb: 2 }}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={formData.password}
+          onChange={(e) => handleInputChange("password", e.target.value)}
           error={!!errors.password}
         />
         {errors.password && (
-          <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+          <Typography color="error" variant="body2">
             {errors.password}
           </Typography>
         )}
-        {/* Login Button */}
-        <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={handleLogin}>
+      </Grid>
+
+      {/* Display API Errors */}
+      {apiError && (
+        <Grid item xs={12}>
+          <Typography color="error" variant="body2" align="center">
+            {apiError}
+          </Typography>
+        </Grid>
+      )}
+
+      {/* Submit Button */}
+      <Grid item xs={12} sx={{ textAlign: "center" }}>
+        <Button variant="contained" onClick={handleLogin}>
           Login
         </Button>
-      </Box>
+      </Grid>
     </Grid>
   );
 }

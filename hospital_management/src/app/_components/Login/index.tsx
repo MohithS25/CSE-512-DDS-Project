@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 
 // Define types for form fields and errors
 type FormFields = {
-  firstName: string;
-  lastName: string;
   email: string;
-  phone: string;
-  password: string;
+  first_name: string;
+  last_name: string;
   location: string;
+  password: string;
+  phone: string;
 };
 
 type Errors = Partial<FormFields>;
@@ -19,25 +19,25 @@ export default function LoginPage() {
   const router = useRouter();
 
   const [formData, setFormData] = useState<FormFields>({
-    firstName: "",
-    lastName: "",
     email: "",
-    phone: "",
-    password: "",
+    first_name: "",
+    last_name: "",
     location: "",
+    password: "",
+    phone: "",
   });
 
   const [errors, setErrors] = useState<Errors>({});
 
-  const locations = ["New York", "Los Angeles", "Chicago", "Houston", "San Francisco"]; // Example locations
+  const locations = ["Phoenix", "Tempe", "Gilbert", "Mesa", "Tucson"]; // Example locations
 
   const validateForm = () => {
     const newErrors: Errors = {
-      firstName: formData.firstName.trim() ? "" : "First name is required.",
-      lastName: formData.lastName.trim() ? "" : "Last name is required.",
       email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
         ? ""
         : "Please enter a valid email address.",
+      first_name: formData.first_name.trim() ? "" : "First name is required.",
+      last_name: formData.last_name.trim() ? "" : "Last name is required.",
       phone: /^[0-9]{10}$/.test(formData.phone.trim())
         ? ""
         : "Phone number must be 10 digits.",
@@ -56,55 +56,142 @@ export default function LoginPage() {
     setErrors((prev) => ({ ...prev, [field]: "" })); // Clear specific error
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!validateForm()) return;
 
-    console.log("Signup successful!", formData);
-   // alert("Signup successful! Redirecting to homepage...");
-    router.push("/homePage"); // Redirect to the homepage
+    try {
+      const response = await fetch("http://localhost:8000/signup/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        console.log("Signup successful!");
+        alert("Signup successful! Redirecting to homepage...");
+        router.push("/homePage"); // Redirect to the homepage
+      } else {
+        const data = await response.json();
+        console.error("Error:", data);
+        alert(data.message || "Signup failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      alert("An error occurred. Please try again later.");
+    }
   };
 
   return (
     <Grid container spacing={2} sx={{ padding: "20px" }}>
-      {/* Render all fields except Location */}
-      {Object.entries(formData).map(([field, value]) => {
-        if (field === "location") return null; // Skip rendering the location here
-        const label = field
-          .replace(/([A-Z])/g, " $1")
-          .replace(/^./, (str) => str.toUpperCase()); // Convert "firstName" to "First Name"
-        const isPassword = field === "password";
-        const isPhone = field === "phone";
+      {/* Email */}
+      <Grid item xs={12}>
+        <FormLabel htmlFor="email" required>
+          Email
+        </FormLabel>
+        <OutlinedInput
+          id="email"
+          placeholder="Email"
+          size="small"
+          fullWidth
+          value={formData.email}
+          onChange={(e) => handleInputChange("email", e.target.value)}
+          error={!!errors.email}
+        />
+        {errors.email && (
+          <Typography color="error" variant="body2">
+            {errors.email}
+          </Typography>
+        )}
+      </Grid>
 
-        return (
-          <Grid
-            key={field}
-            item
-            xs={12}
-            md={["firstName", "lastName", "phone", "password"].includes(field) ? 6 : 12}
-          >
-            <FormLabel htmlFor={field} required>
-              {label}
-            </FormLabel>
-            <OutlinedInput
-              id={field}
-              type={isPassword ? "password" : isPhone ? "tel" : "text"}
-              placeholder={label}
-              size="small"
-              fullWidth
-              value={value}
-              onChange={(e) => handleInputChange(field as keyof FormFields, e.target.value)}
-              error={!!errors[field as keyof FormFields]}
-            />
-            {errors[field as keyof FormFields] && (
-              <Typography color="error" variant="body2">
-                {errors[field as keyof FormFields]}
-              </Typography>
-            )}
-          </Grid>
-        );
-      })}
+      {/* First Name */}
+      <Grid item xs={12} sm={6}>
+        <FormLabel htmlFor="first_name" required>
+          First Name
+        </FormLabel>
+        <OutlinedInput
+          id="first_name"
+          placeholder="First Name"
+          size="small"
+          fullWidth
+          value={formData.first_name}
+          onChange={(e) => handleInputChange("first_name", e.target.value)}
+          error={!!errors.first_name}
+        />
+        {errors.first_name && (
+          <Typography color="error" variant="body2">
+            {errors.first_name}
+          </Typography>
+        )}
+      </Grid>
 
-      {/* Location Field as Dropdown */}
+      {/* Last Name */}
+      <Grid item xs={12} sm={6}>
+        <FormLabel htmlFor="last_name" required>
+          Last Name
+        </FormLabel>
+        <OutlinedInput
+          id="last_name"
+          placeholder="Last Name"
+          size="small"
+          fullWidth
+          value={formData.last_name}
+          onChange={(e) => handleInputChange("last_name", e.target.value)}
+          error={!!errors.last_name}
+        />
+        {errors.last_name && (
+          <Typography color="error" variant="body2">
+            {errors.last_name}
+          </Typography>
+        )}
+      </Grid>
+
+      {/* Password */}
+      <Grid item xs={12}>
+        <FormLabel htmlFor="password" required>
+          Password
+        </FormLabel>
+        <OutlinedInput
+          id="password"
+          type="password"
+          placeholder="Password"
+          size="small"
+          fullWidth
+          value={formData.password}
+          onChange={(e) => handleInputChange("password", e.target.value)}
+          error={!!errors.password}
+        />
+        {errors.password && (
+          <Typography color="error" variant="body2">
+            {errors.password}
+          </Typography>
+        )}
+      </Grid>
+
+      {/* Phone */}
+      <Grid item xs={12}>
+        <FormLabel htmlFor="phone" required>
+          Phone
+        </FormLabel>
+        <OutlinedInput
+          id="phone"
+          placeholder="Phone"
+          size="small"
+          fullWidth
+          value={formData.phone}
+          onChange={(e) => handleInputChange("phone", e.target.value)}
+          error={!!errors.phone}
+        />
+        {errors.phone && (
+          <Typography color="error" variant="body2">
+            {errors.phone}
+          </Typography>
+        )}
+      </Grid>
+
+      {/* Location as Dropdown */}
       <Grid item xs={12}>
         <FormLabel htmlFor="location" required>
           Location

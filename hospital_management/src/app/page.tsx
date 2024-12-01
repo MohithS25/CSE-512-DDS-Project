@@ -8,10 +8,10 @@ export default function HomePage() {
       <p className={styles.description}>Navigate through the app using the links below.</p>
 
       <div className={styles.buttonContainer}>
-        <a href="/login" className={`${styles.button} ${styles.loginButton}`}>
+        <a href="/signup" className={`${styles.button} ${styles.loginButton}`}>
           Login
         </a>
-        <a href="/signup" className={`${styles.button} ${styles.signupButton}`}>
+        <a href="/loginPage" className={`${styles.button} ${styles.signupButton}`}>
           Signup
         </a>
       </div>
