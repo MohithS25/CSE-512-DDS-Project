@@ -1,13 +1,40 @@
-/* Scoped styles for the page */
-.title {
-  color: #333;
-}
-
-.text {
-  color: #666;
-}
-
-.page {
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
   text-align: center;
-  margin-top: 50px;
+}
+
+.heading {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.description {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.buttonContainer {
+  margin-top: 20px;
+}
+
+.button {
+  text-decoration: none;
+  margin: 0 10px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  color: white;
+  display: inline-block;
+}
+
+.loginButton {
+  background-color: #007bff; /* Blue */
+}
+
+.signupButton {
+  background-color: #28a745; /* Green */
 }
