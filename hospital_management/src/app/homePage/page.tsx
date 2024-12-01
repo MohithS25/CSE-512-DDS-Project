@@ -1,74 +1,110 @@
+"use client";
 import React, { useState, useEffect } from "react";
-import { Box, Grid, Card, CardContent, Typography, Button } from "@mui/material";
-import { useRouter } from "next/router";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardActions from "@mui/material/CardActions";
+import CardContent from "@mui/material/CardContent";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import FormLabel from "@mui/material/FormLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import { SelectChangeEvent } from "@mui/material"; // Correct import for the event type
+import Link from "next/link"; // Import Link for navigation
 
-const HomePage = () => {
-  const [location, setLocation] = useState("Phoenix"); // Default location
+const locations = ["Phoenix", "Tempe", "Gilbert", "Mesa", "Tucson"];
+
+const CardComponent = () => {
+  const [location, setLocation] = useState<string>(""); // Initial state for location selection
   const [hospitals, setHospitals] = useState<any[]>([]); // State to store hospital data
+  const [loading, setLoading] = useState<boolean>(false); // Loading state for API request
 
-  // Fetch data from API based on location
-  useEffect(() => {
-    const fetchHospitals = async () => {
+  // Handle location change
+  const handleLocationChange = async (event: SelectChangeEvent<string>) => {
+    const selectedLocation = event.target.value;
+    setLocation(selectedLocation);
+
+    // Fetch hospitals for the selected location
+    if (selectedLocation) {
+      setLoading(true);
       try {
-        const response = await fetch(`http://localhost:8000/hospitals?location=${location}`);
+        const response = await fetch("http://localhost:8000/gethospitalsdetails/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ location: selectedLocation }),
+        });
         const data = await response.json();
 
-        if (data.status === "success") {
-          setHospitals(data.data); // Store hospital data
+        if (response.ok) {
+          setHospitals(data.data || []); // Update hospitals data with the response
         } else {
-          console.error("Error fetching hospital data");
+          console.error("Error fetching hospital data:", data.message);
+          setHospitals([]); // Reset if no hospitals found
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+        setHospitals([]); // Reset on error
+      } finally {
+        setLoading(false);
       }
-    };
-
-    fetchHospitals(); // Call the API when the location changes
-  }, [location]); // Dependency array includes location to refetch when location changes
-
-  // Handler for location change
-  const handleLocationChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setLocation(event.target.value as string); // Update location and fetch new data
+    }
   };
 
   return (
-    <Box sx={{ p: 4 }}>
-      {/* Location Dropdown */}
-      <Box sx={{ display: "flex", justifyContent: "flex-start", marginBottom: 2 }}>
-        <Typography variant="h6" sx={{ mr: 2 }}>Change Location:</Typography>
-        <select value={location} onChange={handleLocationChange} style={{ padding: "8px" }}>
-          <option value="Phoenix">Phoenix</option>
-          <option value="New York">New York</option>
-          <option value="Los Angeles">Los Angeles</option>
-          {/* Add more locations if needed */}
-        </select>
+    <Box sx={{ p: 4, pt: 10 }}>
+      {/* Location Dropdown with FormLabel */}
+      <Box sx={{ display: "flex", flexDirection: "column", marginBottom: 3 }}>
+        <FormLabel htmlFor="location" sx={{ marginBottom: 2 }}>
+          Change Location
+        </FormLabel>
+        <Select
+          id="location"
+          value={location}
+          onChange={handleLocationChange}
+          displayEmpty
+          sx={{ width: 200 }}
+        >
+          <MenuItem value="" disabled>Select a location</MenuItem>
+          {locations.map((loc) => (
+            <MenuItem key={loc} value={loc}>{loc}</MenuItem>
+          ))}
+        </Select>
       </Box>
 
-      {/* Display Hospitals in Cards */}
-      <Grid container spacing={2}>
-        {hospitals.map((hospital) => (
-          <Grid item xs={12} sm={6} md={4} key={hospital.hospital_id}>
-            <Card sx={{ boxShadow: 3, p: 2 }}>
+      {/* Loading Indicator */}
+      {loading && <Typography variant="h6">Loading hospitals...</Typography>}
+
+      {/* Cards Grid Layout */}
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 3, marginBottom: 4 }}>
+        {hospitals.length > 0 ? (
+          hospitals.map((hospital, index) => (
+            <Card key={index} sx={{ backgroundColor: index % 2 === 0 ? '#B1B1B1' : '#808286', color: 'black', boxShadow: 3 }}>
               <CardContent>
-                <Typography variant="h5" component="div">{hospital.name}</Typography>
-                <Typography variant="body2" color="text.secondary">{hospital.location}</Typography>
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  {hospital.address}
+                <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
+                  Hospital Information
                 </Typography>
+                <Typography variant="h5" component="div">{hospital.name}</Typography>
+                <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>{hospital.location}</Typography>
+                <Typography variant="body2">{hospital.address}</Typography>
               </CardContent>
-              <Box sx={{ textAlign: "center" }}>
-                <Button variant="contained" sx={{ mt: 2 }}>
-                  <a href={`/book-appointment/${hospital.name.replace(/\s+/g, '-')}`} style={{ textDecoration: "none", color: "white" }}>
-                    Book Appointment
-                  </a>
-                </Button>
-              </Box>
+              <CardActions>
+                <Link
+                  href={`/book-appointment/${hospital.name}`} // Link to the booking page with hospital name as a URL parameter
+                  passHref
+                >
+                  <Button size="small">Book Appointment</Button>
+                </Link>
+              </CardActions>
             </Card>
-          </Grid>
-        ))}
-      </Grid>
+          ))
+        ) : (
+          <Typography></Typography>
+        )}
+      </Box>
     </Box>
   );
 };
 
-export default HomePage;
+export default CardComponent;
