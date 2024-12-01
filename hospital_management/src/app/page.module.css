@@ -1,20 +1,14 @@
+/* Base styles */
 .container {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Full viewport height */
+  flex-direction: column;
+  height: 100vh;
+  background: url('/images/signup.jpg') no-repeat center center/cover;
+  font-family: 'Arial', sans-serif;
   text-align: center;
-}
-
-.heading {
-  font-size: 2rem;
-  margin-bottom: 10px;
-}
-
-.description {
-  font-size: 1.2rem;
-  margin-bottom: 20px;
+  padding: 20px;
 }
 
 .buttonContainer {
@@ -22,19 +16,94 @@
 }
 
 .button {
-  text-decoration: none;
-  margin: 0 10px;
   padding: 10px 20px;
   border-radius: 5px;
-  font-size: 16px;
-  color: white;
-  display: inline-block;
+  font-size: 18px;
+  text-decoration: none;
+  color: #fff;
+  transition: all 0.3s ease-in-out;
 }
 
 .loginButton {
-  background-color: #007bff; /* Blue */
+  background-color: #007bff; /* Blue button */
+  margin-right: 10px;
 }
 
 .signupButton {
-  background-color: #28a745; /* Green */
+  background-color: #28a745; /* Green button */
+}
+
+.button:hover {
+  transform: scale(1.1);
+}
+
+/* Dark gradient text effect */
+.heading {
+  font-size: 3rem;
+  font-weight: bold;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(to right, #0a0a0a, #333); /* Dark gradient */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; /* Make the text transparent to show the gradient */
+}
+
+.description {
+  font-size: 1.6rem;
+  margin: 10px 0;
+  max-width: 600px;
+  line-height: 1.6;
+  background: linear-gradient(to right, #1a1a1a, #444); /* Dark gradient */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; /* Make the text transparent to show the gradient */
+}
+
+/* Animation effects */
+.fadeIn {
+  animation: fadeIn 2s ease-in-out;
+}
+
+.zoomIn {
+  animation: zoomIn 1.5s ease-in-out;
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .heading {
+    font-size: 3rem;
+  }
+
+  .description {
+    font-size: 1.2rem;
+  }
+
+  .button {
+    font-size: 16px;
+    padding: 8px 18px;
+  }
 }

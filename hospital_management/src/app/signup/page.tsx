@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import { Grid, FormLabel, OutlinedInput, Button, Typography } from "@mui/material";
+import { Grid, FormLabel, OutlinedInput, Button, Typography, Box } from "@mui/material";
 import { useRouter } from "next/navigation";
+import styles from '../page.module.css'; 
 
 // Define types for form fields and errors
 type FormFields = {
@@ -69,65 +70,129 @@ export default function LoginPage() {
   };
 
   return (
-    <Grid container spacing={2} sx={{ padding: "20px" }}>
-      {/* Email */}
-      <Grid item xs={12}>
-        <FormLabel htmlFor="email" required>
-          Email
-        </FormLabel>
-        <OutlinedInput
-          id="email"
-          placeholder="Email"
-          size="small"
-          fullWidth
-          value={formData.email}
-          onChange={(e) => handleInputChange("email", e.target.value)}
-          error={!!errors.email}
-        />
-        {errors.email && (
-          <Typography color="error" variant="body2">
-            {errors.email}
-          </Typography>
-        )}
-      </Grid>
-
-      {/* Password */}
-      <Grid item xs={12}>
-        <FormLabel htmlFor="password" required>
-          Password
-        </FormLabel>
-        <OutlinedInput
-          id="password"
-          type="password"
-          placeholder="Password"
-          size="small"
-          fullWidth
-          value={formData.password}
-          onChange={(e) => handleInputChange("password", e.target.value)}
-          error={!!errors.password}
-        />
-        {errors.password && (
-          <Typography color="error" variant="body2">
-            {errors.password}
-          </Typography>
-        )}
-      </Grid>
-
-      {/* Display API Errors */}
-      {apiError && (
+    <main className={styles.container}>
+    <Box
+      sx={{
+        background: "linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%)",
+        borderRadius: "12px",
+        padding: "30px",
+        boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
+        width: "100%",
+        maxWidth: "500px",
+        marginTop: "40px", // Margin top for spacing
+        transform: "scale(1)",
+        transition: "transform 0.3s ease-in-out",
+        "&:hover": {
+          transform: "scale(1.05)", // Slight zoom effect on hover
+        },
+      }}
+    >
+      <Grid container spacing={2}>
+        {/* Email */}
         <Grid item xs={12}>
-          <Typography color="error" variant="body2" align="center">
-            {apiError}
-          </Typography>
+          <FormLabel
+            htmlFor="email"
+            required
+            sx={{
+              textAlign: "left", // Left align the label
+              display: "block", // Ensure label is block-level
+            }}
+          >
+            Email
+          </FormLabel>
+          <OutlinedInput
+            id="email"
+            placeholder="Email"
+            size="small"
+            fullWidth
+            value={formData.email}
+            onChange={(e) => handleInputChange("email", e.target.value)}
+            error={!!errors.email}
+            sx={{
+              "&:hover": {
+                borderColor: "#ff7e5f",
+              },
+              "&.Mui-focused": {
+                borderColor: "#ff7e5f", // Highlight on focus
+              },
+              transition: "border-color 0.3s ease",
+            }}
+          />
+          {errors.email && (
+            <Typography color="error" variant="body2">
+              {errors.email}
+            </Typography>
+          )}
         </Grid>
-      )}
 
-      {/* Submit Button */}
-      <Grid item xs={12} sx={{ textAlign: "center" }}>
-        <Button variant="contained" onClick={handleLogin}>
-          Login
-        </Button>
+        {/* Password */}
+        <Grid item xs={12}>
+          <FormLabel
+            htmlFor="password"
+            required
+            sx={{
+              textAlign: "left", // Left align the label
+              display: "block", // Ensure label is block-level
+            }}
+          >
+            Password
+          </FormLabel>
+          <OutlinedInput
+            id="password"
+            type="password"
+            placeholder="Password"
+            size="small"
+            fullWidth
+            value={formData.password}
+            onChange={(e) => handleInputChange("password", e.target.value)}
+            error={!!errors.password}
+            sx={{
+              "&:hover": {
+                borderColor: "#ff7e5f",
+              },
+              "&.Mui-focused": {
+                borderColor: "#ff7e5f",
+              },
+              transition: "border-color 0.3s ease",
+            }}
+          />
+          {errors.password && (
+            <Typography color="error" variant="body2">
+              {errors.password}
+            </Typography>
+          )}
+        </Grid>
+
+        {/* Display API Errors */}
+        {apiError && (
+          <Grid item xs={12}>
+            <Typography color="error" variant="body2" align="center">
+              {apiError}
+            </Typography>
+          </Grid>
+        )}
+
+        {/* Submit Button */}
+        <Grid item xs={12} sx={{ textAlign: "center" }}>
+          <Button
+            variant="contained"
+            onClick={handleLogin}
+            sx={{
+              backgroundColor: "#ff7e5f", // Button background color
+              "&:hover": {
+                backgroundColor: "#f06c5a", // Hover effect color
+              },
+              width: "100%",
+              padding: "12px",
+              transition: "background-color 0.3s ease",
+              borderRadius: "6px", // Rounded corners for button
+            }}
+          >
+            Login
+          </Button>
+        </Grid>
       </Grid>
-    </Grid>
+    </Box>
+    </main>
   );
 }
