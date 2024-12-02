@@ -140,10 +140,10 @@ const CardComponent = () => {
 
   return (
     <Box sx={{ p: 4, pt: 10 }}>
-      {/* Location Dropdown */}
-      <Box sx={{ display: "flex", flexDirection: "column", marginBottom: 3 }}>
-        <FormLabel htmlFor="location" sx={{ marginBottom: 2 }}>
-          Change Location
+      {/* Location Dropdown and Location Text */}
+      <Box sx={{ display: "flex", alignItems: "center", marginBottom: 3 }}>
+        <FormLabel htmlFor="location" sx={{ marginRight: 2 }}>
+          Choose Location
         </FormLabel>
         <Select
           id="location"
@@ -161,6 +161,16 @@ const CardComponent = () => {
             </MenuItem>
           ))}
         </Select>
+
+        {/* Display the selected location */}
+        {location && (
+          <Typography sx={{ marginLeft: 2, fontSize: "1.5rem", // Increase the font size
+            textAlign: "center", // Center the text
+            fontWeight: "bold",
+            color: "primary.main" }}>
+            You are viewing the hospitals at <strong>{location}</strong>
+          </Typography>
+        )}
       </Box>
 
       {/* Loading Indicator */}
@@ -201,7 +211,7 @@ const CardComponent = () => {
             </Card>
           ))
         ) : (
-          <Typography>No hospitals available for this location.</Typography>
+          <Typography></Typography>
         )}
       </Box>
 

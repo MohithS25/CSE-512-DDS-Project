@@ -4,11 +4,11 @@ import styles from './page.module.css';
 export default function HomePage() {
   return (
     <main className={styles.container}>
-      <h1 className={`${styles.heading} ${styles.fadeIn}`}>Welcome to My App</h1>
-      <p className={`${styles.description} ${styles.zoomIn}`}>
-        Navigate through the app using the links below.
-      </p>
-
+      <h1 className={`${styles.heading} ${styles.fadeIn}`}>GROUP X</h1>
+      <h2 className={`${styles.description} ${styles.zoomIn}`}>
+        Healthcare Information Systems
+      </h2>
+      
       <div className={styles.buttonContainer}>
         <a href="/signup" className={`${styles.button} ${styles.loginButton}`}>
           Login
