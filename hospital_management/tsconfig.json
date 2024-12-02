@@ -18,8 +18,10 @@
         "name": "next"
       }
     ],
+    "baseUrl": "./src",   // Set baseUrl for correct path resolution
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./*"],      // General alias for the src directory
+      "@utils/*": ["utils/*"]  // Alias for the utils folder inside src
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
