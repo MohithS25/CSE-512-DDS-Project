@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -14,9 +15,29 @@ import Link from "next/link"; // Import Link for navigation
 
 const locations = ["Phoenix", "Tempe", "Gilbert", "Mesa", "Tucson"];
 
+// Define types for hospital, department, and doctor
+interface Doctor {
+  doctor_id: string;
+  doctor_name: string;
+}
+
+interface Department {
+  department_id: string;
+  department_name: string;
+  doctors: Doctor[];
+}
+
+interface Hospital {
+  hospital_id: string;
+  name: string;
+  location: string;
+  address: string;
+  departments: Department[];
+}
+
 const CardComponent = () => {
   const [location, setLocation] = useState<string>(""); // Initial state for location selection
-  const [hospitals, setHospitals] = useState<any[]>([]); // State to store hospital data
+  const [hospitals, setHospitals] = useState<Hospital[]>([]); // State to store hospital data
   const [loading, setLoading] = useState<boolean>(false); // Loading state for API request
 
   // Handle location change
@@ -66,9 +87,13 @@ const CardComponent = () => {
           displayEmpty
           sx={{ width: 200 }}
         >
-          <MenuItem value="" disabled>Select a location</MenuItem>
+          <MenuItem value="" disabled>
+            Select a location
+          </MenuItem>
           {locations.map((loc) => (
-            <MenuItem key={loc} value={loc}>{loc}</MenuItem>
+            <MenuItem key={loc} value={loc}>
+              {loc}
+            </MenuItem>
           ))}
         </Select>
       </Box>
@@ -80,27 +105,58 @@ const CardComponent = () => {
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 3, marginBottom: 4 }}>
         {hospitals.length > 0 ? (
           hospitals.map((hospital, index) => (
-            <Card key={index} sx={{ backgroundColor: index % 2 === 0 ? '#B1B1B1' : '#808286', color: 'black', boxShadow: 3 }}>
+            <Card
+              key={index}
+              sx={{
+                backgroundColor: index % 2 === 0 ? "#B1B1B1" : "#808286",
+                color: "black",
+                boxShadow: 3,
+              }}
+            >
               <CardContent>
-                <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
+                <Typography gutterBottom sx={{ color: "text.secondary", fontSize: 14 }}>
                   Hospital Information
                 </Typography>
-                <Typography variant="h5" component="div">{hospital.name}</Typography>
-                <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>{hospital.location}</Typography>
+                <Typography variant="h5" component="div">
+                  {hospital.name}
+                </Typography>
+                <Typography sx={{ color: "text.secondary", mb: 1.5 }}>{hospital.location}</Typography>
                 <Typography variant="body2">{hospital.address}</Typography>
+
+                {/* Display departments and doctors */}
+                {hospital.departments && hospital.departments.length > 0 ? (
+                  <Box sx={{ marginTop: 2 }}>
+                    {hospital.departments.map((department) => (
+                      <Box key={department.department_id} sx={{ marginBottom: 2 }}>
+                        <Typography variant="h6">{department.department_name}</Typography>
+                        <ul>
+                          {department.doctors.map((doctor) => (
+                            <li key={doctor.doctor_id}>
+                              <Typography variant="body2">{doctor.doctor_name}</Typography>
+                            </li>
+                          ))}
+                        </ul>
+                      </Box>
+                    ))}
+                  </Box>
+                ) : (
+                  <Typography variant="body2">No departments available</Typography>
+                )}
               </CardContent>
+             
               <CardActions>
-                <Link
-                  href={`/book-appointment/${hospital.name}`} // Link to the booking page with hospital name as a URL parameter
-                  passHref
-                >
-                  <Button size="small">Book Appointment</Button>
-                </Link>
-              </CardActions>
+              <Link
+  href={`/book-appointment/${hospital.hospital_id}`} // Use hospital ID instead of name
+  passHref
+>
+  <Button size="small">Book Appointment</Button>
+</Link>
+</CardActions>
+              
             </Card>
           ))
         ) : (
-          <Typography></Typography>
+          <Typography>No hospitals found for this location</Typography>
         )}
       </Box>
     </Box>

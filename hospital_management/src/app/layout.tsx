@@ -1,18 +1,16 @@
 import React from 'react';
 import Navbar from './_components/Navbar';
 import './globals.css';
-
-export const metadata = {
-  title: 'My App',
-  description: 'An awesome app built with Next.js',
-};
+import { HospitalProvider } from './_components/Context/HospitalContext';
 
 const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <html lang="en">
       <body>
-        <Navbar />
-        <main>{children}</main>
+        <HospitalProvider> {/* Wrap the entire body with HospitalProvider */}
+          <Navbar /> {/* Include Navbar */}
+          <main>{children}</main> {/* Include the children */}
+        </HospitalProvider>
       </body>
     </html>
   );
