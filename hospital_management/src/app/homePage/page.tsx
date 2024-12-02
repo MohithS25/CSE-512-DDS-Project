@@ -9,27 +9,11 @@ import Typography from "@mui/material/Typography";
 import FormLabel from "@mui/material/FormLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import { SelectChangeEvent } from "@mui/material"; // Correct import for the event type
+import { SelectChangeEvent } from "@mui/material";
 import { useHospitalContext } from "../_components/Context/HospitalContext"; // Use context
 import Modal from "@mui/material/Modal";
-
-// Helper function to fetch doctor availability
-const getDoctorAvailability = async (hospital_name: string, department_name: string, doctor_name: string) => {
-  const response = await fetch("http://localhost:8000/get-doctor-availability/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      hospital_name,
-      department_name,
-      doctor_name,
-    }),
-  });
-
-  const data = await response.json();
-  return data;
-};
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 const locations = ["Phoenix", "Tempe", "Gilbert", "Mesa", "Tucson"];
 
@@ -40,10 +24,10 @@ const CardComponent = () => {
   const [loading, setLoading] = useState<boolean>(false); // Loading state for API request
   const [selectedHospital, setSelectedHospital] = useState<any>(null); // Store selected hospital details
   const [openHospitalModal, setOpenHospitalModal] = useState<boolean>(false); // Hospital Modal open/close state
-  const [openDoctorModal, setOpenDoctorModal] = useState<boolean>(false); // Doctor Availability Modal open/close state
   const [selectedDepartment, setSelectedDepartment] = useState<any>(null); // Store selected department
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null); // Store selected doctor
   const [doctorAvailability, setDoctorAvailability] = useState<any>(null); // Store doctor availability data
+  const [selectedSlots, setSelectedSlots] = useState<any[]>([]); // State to store selected slots
 
   // Handle location change
   const handleLocationChange = async (event: SelectChangeEvent<string>) => {
@@ -81,6 +65,9 @@ const CardComponent = () => {
   // Open Hospital Modal and set selected hospital
   const handleOpenHospitalModal = (hospital: any) => {
     setSelectedHospital(hospital);
+    setSelectedDepartment(null); // Reset department and doctor when new hospital is selected
+    setSelectedDoctor(null);
+    setDoctorAvailability(null); // Reset doctor availability
     setOpenHospitalModal(true);
   };
 
@@ -88,31 +75,62 @@ const CardComponent = () => {
   const handleSelectDepartmentAndDoctor = (department: any, doctor: any) => {
     setSelectedDepartment(department);
     setSelectedDoctor(doctor);
-    setOpenHospitalModal(false); // Close the hospital modal
-    setOpenDoctorModal(true); // Open doctor availability modal
-    handleCheckAvailability(department, doctor); // Call API to fetch doctor availability
+    setDoctorAvailability(doctor.available_slots); // Show doctor's available slots immediately
   };
 
-  // Fetch doctor availability from the API
-  const handleCheckAvailability = async (department: any, doctor: any) => {
-    if (selectedHospital && department && doctor) {
-      try {
-        const data = await getDoctorAvailability(
-          selectedHospital.name,
-          department.department_name,
-          doctor.doctor_name
-        );
-        setDoctorAvailability(data.data); // Set doctor availability data
-      } catch (error) {
-        console.error("Error fetching doctor availability:", error);
-        setDoctorAvailability(null); // Reset on error
+  // Handle checkbox change for selecting available slots
+  const handleSlotChange = (slot: any) => {
+    setSelectedSlots((prevSelectedSlots) => {
+      if (prevSelectedSlots.includes(slot)) {
+        // If the slot is already selected, remove it from the array
+        return prevSelectedSlots.filter((item) => item !== slot);
+      } else {
+        // If the slot is not selected, add it to the array
+        return [...prevSelectedSlots, slot];
       }
+    });
+  };
+
+  // Handle booking the appointment by sending the selected date and time to the backend API
+  const handleBookAppointment = async () => {
+    if (!selectedDoctor || selectedSlots.length === 0) {
+      alert("Please select a doctor and at least one slot.");
+      return;
+    }
+
+    // Construct the data to be sent to the backend
+    const appointmentData = selectedSlots.map((slot) => ({
+      doctor_id: selectedDoctor.doctor_id,
+      date: slot.available_date,
+      time: slot.available_time,
+    }));
+
+    try {
+      // Send the data to the book_appointment API
+      const response = await fetch("http://localhost:8000/book_appointment/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(appointmentData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Appointment booked successfully.");
+      } else {
+        alert(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Error booking appointment:", error);
+      alert("An error occurred while booking the appointment.");
     }
   };
 
   return (
     <Box sx={{ p: 4, pt: 10 }}>
-      {/* Location Dropdown with FormLabel */}
+      {/* Location Dropdown */}
       <Box sx={{ display: "flex", flexDirection: "column", marginBottom: 3 }}>
         <FormLabel htmlFor="location" sx={{ marginBottom: 2 }}>
           Change Location
@@ -142,7 +160,10 @@ const CardComponent = () => {
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 3, marginBottom: 4 }}>
         {hospitals.length > 0 ? (
           hospitals.map((hospital, index) => (
-            <Card key={index} sx={{ backgroundColor: index % 2 === 0 ? "#B1B1B1" : "#808286", color: "black", boxShadow: 3 }}>
+            <Card
+              key={index}
+              sx={{ backgroundColor: index % 2 === 0 ? "#B1B1B1" : "#808286", color: "black", boxShadow: 3 }}
+            >
               <CardContent>
                 <Typography gutterBottom sx={{ color: "text.secondary", fontSize: 14 }}>
                   Hospital Information
@@ -165,40 +186,50 @@ const CardComponent = () => {
         )}
       </Box>
 
-      {/* Hospital Modal: Departments and Doctors */}
+      {/* Hospital Modal */}
       <Modal open={openHospitalModal} onClose={() => setOpenHospitalModal(false)}>
-        <Box sx={{ width: 400, padding: 2, backgroundColor: "white", margin: "auto", marginTop: "100px" }}>
-          <Typography variant="h6">Departments and Doctors</Typography>
-          {selectedHospital && selectedHospital.departments.map((department: any) => (
-            <Box key={department.department_id}>
-              <Typography variant="body2">{department.department_name}</Typography>
-              {department.doctors.map((doctor: any) => (
-                <Button
-                  key={doctor.doctor_id}
-                  onClick={() => handleSelectDepartmentAndDoctor(department, doctor)}
-                  sx={{ marginLeft: 2 }}
-                >
-                  {doctor.doctor_name}
-                </Button>
-              ))}
-            </Box>
-          ))}
-        </Box>
-      </Modal>
-
-      {/* Doctor Availability Modal */}
-      <Modal open={openDoctorModal} onClose={() => setOpenDoctorModal(false)}>
-        <Box sx={{ width: 400, padding: 2, backgroundColor: "white", margin: "auto", marginTop: "100px" }}>
-          <Typography variant="h6">Doctor Availability</Typography>
-          {doctorAvailability ? (
-            <div>
-              <Typography variant="body2">Hospital: {selectedHospital?.name}</Typography>
+        <Box sx={{ width: 600, padding: 2, backgroundColor: "white", margin: "auto", marginTop: "100px" }}>
+          <Typography variant="h6">Hospital: {selectedHospital?.name}</Typography>
+          <Typography variant="body2">{selectedHospital?.location}</Typography>
+          <Typography variant="body2">{selectedHospital?.address}</Typography>
+          <hr />
+          <Typography variant="h6">Departments</Typography>
+          {selectedHospital &&
+            selectedHospital.departments.map((department: any) => (
+              <Box key={department.department_id} sx={{ marginBottom: 2 }}>
+                <Typography variant="body1">{department.department_name}</Typography>
+                {department.doctors.map((doctor: any) => (
+                  <Button
+                    key={doctor.doctor_id}
+                    onClick={() => handleSelectDepartmentAndDoctor(department, doctor)}
+                    sx={{ marginLeft: 2 }}
+                  >
+                    {doctor.doctor_name}
+                  </Button>
+                ))}
+              </Box>
+            ))}
+          {selectedDepartment && selectedDoctor && (
+            <Box sx={{ marginTop: 4 }}>
+              <Typography variant="h6">Doctor: {selectedDoctor?.doctor_name}</Typography>
               <Typography variant="body2">Department: {selectedDepartment?.department_name}</Typography>
-              <Typography variant="body2">Doctor: {selectedDoctor?.doctor_name}</Typography>
-              <Typography variant="body2">Available Time: {doctorAvailability?.available_time}</Typography>
-            </div>
-          ) : (
-            <Typography variant="body2">Loading doctor availability...</Typography>
+              <Typography variant="body2">Available Slots:</Typography>
+              {doctorAvailability && doctorAvailability.length > 0 ? (
+                doctorAvailability.map((slot: any, index: number) => (
+                  <Box key={index}>
+                    <FormControlLabel
+                      control={<Checkbox onChange={() => handleSlotChange(slot)} />}
+                      label={`Date: ${slot.available_date}, Time: ${slot.available_time}`}
+                    />
+                  </Box>
+                ))
+              ) : (
+                <Typography>No available slots.</Typography>
+              )}
+              <Button onClick={handleBookAppointment} sx={{ marginTop: 3 }} variant="contained">
+                Book Appointment
+              </Button>
+            </Box>
           )}
         </Box>
       </Modal>
