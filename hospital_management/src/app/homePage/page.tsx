@@ -14,6 +14,8 @@ import { useHospitalContext } from "../_components/Context/HospitalContext"; // 
 import Modal from "@mui/material/Modal";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Snackbar from "@mui/material/Snackbar";
+import Alert, { AlertColor } from "@mui/material/Alert"; // Import Alert and AlertColor
 
 const locations = ["Phoenix", "Tempe", "Gilbert", "Mesa", "Tucson"];
 
@@ -28,6 +30,10 @@ const CardComponent = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null); // Store selected doctor
   const [doctorAvailability, setDoctorAvailability] = useState<any>(null); // Store doctor availability data
   const [selectedSlots, setSelectedSlots] = useState<any[]>([]); // State to store selected slots
+
+  const [openSnackbar, setOpenSnackbar] = useState(false); // Snackbar open state
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
+  const [snackbarSeverity, setSnackbarSeverity] = useState<AlertColor>("success"); // Use AlertColor type for severity
 
   // Handle location change
   const handleLocationChange = async (event: SelectChangeEvent<string>) => {
@@ -118,14 +124,18 @@ const CardComponent = () => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Appointment booked successfully.");
+        setSnackbarMessage("Appointment booked successfully.");
+        setSnackbarSeverity("success");
       } else {
-        alert(`Error: ${data.message}`);
+        setSnackbarMessage(`Error: ${data.message}`);
+        setSnackbarSeverity("error");
       }
     } catch (error) {
       console.error("Error booking appointment:", error);
-      alert("An error occurred while booking the appointment.");
+      setSnackbarMessage("An error occurred while booking the appointment.");
+      setSnackbarSeverity("error");
     }
+    setOpenSnackbar(true); // Show snackbar after API response
   };
 
   return (
@@ -162,7 +172,16 @@ const CardComponent = () => {
           hospitals.map((hospital, index) => (
             <Card
               key={index}
-              sx={{ backgroundColor: index % 2 === 0 ? "#B1B1B1" : "#808286", color: "black", boxShadow: 3 }}
+              sx={{
+                backgroundColor: index % 2 === 0 ? "#B1B1B1" : "#808286",
+                color: "black",
+                boxShadow: 3,
+                transition: "transform 0.3s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                  boxShadow: 8,
+                },
+              }}
             >
               <CardContent>
                 <Typography gutterBottom sx={{ color: "text.secondary", fontSize: 14 }}>
@@ -233,6 +252,27 @@ const CardComponent = () => {
           )}
         </Box>
       </Modal>
+
+      {/* Snackbar for Notifications */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }} // Position the Snackbar at the center top
+        sx={{ top: "50%", transform: "translateY(-50%)" }} // Center vertically
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={snackbarSeverity}
+          sx={{
+            width: "100%",
+            fontSize: "1.2rem", // Larger text size
+            textAlign: "center", // Center the text
+          }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
