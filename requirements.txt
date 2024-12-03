@@ -1,0 +1,7 @@
+python
+psycopg2
+react
+django
+postgres
+reactnext
+json
