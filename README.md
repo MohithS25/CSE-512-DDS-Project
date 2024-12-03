@@ -14,6 +14,7 @@ Ensure you have the following installed:
 - Node.js and npm (for the frontend).
 - Python 3.9+ and pip (for the backend).
 - PostgreSQL (for the database).
+- django (for middleware and API's)
 
 ## Steps to Run the Project
 
@@ -69,8 +70,4 @@ Ensure you have the following installed:
     ```sql
     hospital_Gilbert_Regional_Medical_Center_replica
     ```
-3. Horizontal partitioning is implemented for hospitals and users based on location.
 
-## Serializable Transactions
-
-The system ensures serializability using PostgreSQL's transaction isolation level and Django's ORM. This is particularly useful for booking doctor appointments, where simultaneous requests are managed to avoid conflicts.
