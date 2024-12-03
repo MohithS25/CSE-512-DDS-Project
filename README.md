@@ -23,6 +23,16 @@ Python 3.9+ and pip (for the backend).
 PostgreSQL (for the database).
 Django (for middleware API's).
 
+**Steps to Run the Project**
+Frontend (React)
+Navigate to the hospital_management/ folder:
+  cd hospital_management
+Install dependencies:
+  npm install
+Start the development server:
+  npm run dev
+Open the browser at http://localhost:3000 (default port for Vite).
+
 
 
 
